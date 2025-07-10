@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofolio - [Nama Anda/Perusahaan]</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        .nav-link-active {
+            color: #ffffff;
+            background-color: #4f46e5; /* bg-indigo-600 */
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Edit Sidebar Styles */
+        #edit-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px; /* Start off-screen */
+            width: 400px;
+            height: 100%;
+            background-color: #1f2937; /* bg-gray-800 */
+            padding: 2rem;
+            box-shadow: -10px 0 20px rgba(0,0,0,0.25);
+            transition: right 0.3s ease-in-out;
+            z-index: 50;
+            overflow-y: auto;
+        }
+        #edit-sidebar.open {
+            right: 0;
+        }
+        .sidebar-input {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #374151; /* bg-gray-700 */
+            border: 1px solid #4b5563; /* border-gray-600 */
+            border-radius: 0.5rem;
+            color: white;
+            margin-top: 0.5rem;
+        }
+        .sidebar-label {
+            display: block;
+            color: #d1d5db; /* text-gray-300 */
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Edit Mode Toggle Button -->
+    <button id="toggle-edit-mode" class="fixed bottom-5 right-5 bg-indigo-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-indigo-700 transition-transform transform hover:scale-110">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+
+    <!-- Edit Sidebar -->
+    <aside id="edit-sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white">Mode Edit</h2>
+            <button id="close-sidebar" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <!-- General Settings -->
+        <div class="mb-6 pb-6 border-b border-gray-700">
+            <h3 class="text-xl font-semibold text-indigo-400">Info Umum</h3>
+            <label for="edit-nama" class="sidebar-label">Nama Anda/Perusahaan</label>
+            <input type="text" id="edit-nama" class="sidebar-input">
+            
+            <label for="edit-profesi" class="sidebar-label">Profesi</label>
+            <input type="text" id="edit-profesi" class="sidebar-input">
+        </div>
+
+        <!-- About Settings -->
+        <div class="mb-6 pb-6 border-b border-gray-700">
+            <h3 class="text-xl font-semibold text-indigo-400">Tentang Saya</h3>
+             <label for="edit-foto-profil" class="sidebar-label">URL Foto Profil</label>
+            <input type="text" id="edit-foto-profil" class="sidebar-input">
+            <label for="edit-tentang" class="sidebar-label">Deskripsi Tentang Saya</label>
+            <textarea id="edit-tentang" rows="5" class="sidebar-input"></textarea>
+        </div>
+
+        <!-- Projects Settings -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-indigo-400">Proyek</h3>
+            <div id="edit-proyek-list">
+                <!-- Project edit forms will be injected here by JS -->
+            </div>
+            <button id="add-project-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <i class="fas fa-plus"></i> Tambah Proyek
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Header and Navigation -->
+        <header class="py-6">
+            <nav class="flex items-center justify-between">
+                <div class="text-2xl font-bold text-white">
+                    <a href="#" id="display-nama-header" class="hover:text-indigo-400 transition-colors">[Nama Anda/Perusahaan]</a>
+                </div>
+                <ul class="hidden md:flex items-center space-x-2">
+                    <li><a href="#proyek" class="nav-link nav-link-active text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="proyek">Proyek</a></li>
+                    <li><a href="#tentang" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="tentang">Tentang Saya</a></li>
+                    <li><a href="#kontak" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="kontak">Kontak</a></li>
+                </ul>
+                 <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                        <option value="proyek">Proyek</option>
+                        <option value="tentang">Tentang</option>
+                        <option value="kontak">Kontak</option>
+                    </select>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Projects Section -->
+            <section id="proyek" class="content-section active py-12">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Portofolio Proyek</h1>
+                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                        Berikut adalah proyek-proyek terbaik yang pernah saya kerjakan.
+                    </p>
+                </div>
+                <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project cards will be injected here by JS -->
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="tentang" class="content-section py-12">
+                 <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Tentang Saya</h1>
+                </div>
+                <div class="bg-gray-800 rounded-xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+                    <img id="display-foto-profil" class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover ring-4 ring-indigo-500" src="https://placehold.co/200x200/4338ca/ffffff?text=Foto+Anda" alt="Foto Profil">
+                    <div class="text-center md:text-left">
+                        <h2 id="display-nama-tentang" class="text-3xl font-bold text-white">[Nama Anda]</h2>
+                        <p id="display-profesi" class="text-indigo-400 font-semibold text-lg mt-1">[Nama Profesi Anda]</p>
+                        <p id="display-tentang" class="mt-4 text-gray-300 max-w-2xl">
+                            Tuliskan profil singkat Anda di sini.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="kontak" class="content-section py-12">
+                <!-- Contact form remains the same -->
+                 <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Hubungi Saya</h1>
+                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                        Punya pertanyaan atau tawaran kerjasama? Silakan isi formulir di bawah ini.
+                    </p>
+                </div>
+                <div class="max-w-lg mx-auto bg-gray-800 rounded-xl shadow-lg p-8">
+                    <form id="contact-form">
+                        <div id="form-content">
+                            <div class="mb-4">
+                                <label for="name" class="block text-gray-300 text-sm font-bold mb-2">Nama</label>
+                                <input type="text" id="name" name="name" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                            </div>
+                            <div class="mb-4">
+                                <label for="email" class="block text-gray-300 text-sm font-bold mb-2">Email</label>
+                                <input type="email" id="email" name="email" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-300 text-sm font-bold mb-2">Pesan</label>
+                                <textarea id="message" name="message" rows="4" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                                    Kirim Pesan
+                                </button>
+                            </div>
+                        </div>
+                         <div id="success-message" class="hidden text-center">
+                            <h3 class="text-2xl font-bold text-green-400">Pesan Terkirim!</h3>
+                            <p class="text-gray-300 mt-2">Terima kasih telah menghubungi saya. Saya akan segera merespons pesan Anda.</p>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 mt-12 border-t border-gray-800">
+            <p class="text-gray-500">&copy; <span id="current-year"></span> <span id="display-nama-footer">[Nama Anda/Perusahaan]</span>. Dibuat dengan Penuh Semangat.</p>
+        </footer>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DATA ---
+        let portfolioData = {
+            nama: "Nama Anda",
+            profesi: "Profesi Anda",
+            fotoProfil: "https://placehold.co/200x200/4338ca/ffffff?text=Foto+Anda",
+            tentang: "Tuliskan profil singkat Anda di sini. Ceritakan tentang passion Anda, keahlian utama, dan pengalaman yang relevan. Buat paragraf ini menarik dan informatif.",
+            proyek: [
+                {
+                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+1",
+                    judul: "Judul Proyek Pertama",
+                    deskripsi: "Deskripsi singkat tentang proyek ini. Jelaskan teknologi yang digunakan, peran Anda, dan hasil yang dicapai.",
+                    tautan: "#"
+                },
+                {
+                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+2",
+                    judul: "Judul Proyek Kedua",
+                    deskripsi: "Ini adalah contoh studi kasus. Anda bisa menjelaskan tantangan, proses pemecahan masalah, dan solusi yang diimplementasikan.",
+                    tautan: "#"
+                },
+                {
+                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+3",
+                    judul: "Judul Proyek Ketiga",
+                    deskripsi: "Proyek ini menampilkan keahlian dalam [sebutkan keahlian]. Fokus pada kontribusi unik dan dampak yang dihasilkan.",
+                    tautan: "#"
+                }
+            ]
+        };
+
+        // --- ELEMENTS ---
+        const sidebar = document.getElementById('edit-sidebar');
+        const toggleButton = document.getElementById('toggle-edit-mode');
+        const closeButton = document.getElementById('close-sidebar');
+        const addProjectBtn = document.getElementById('add-project-btn');
+
+        // --- FUNCTIONS ---
+
+        // Function to render all content to the page based on portfolioData
+        function renderPageContent() {
+            // General
+            document.getElementById('display-nama-header').textContent = portfolioData.nama;
+            document.getElementById('display-nama-tentang').textContent = portfolioData.nama;
+            document.getElementById('display-nama-footer').textContent = portfolioData.nama;
+            document.getElementById('display-profesi').textContent = portfolioData.profesi;
+            
+            // About
+            document.getElementById('display-foto-profil').src = portfolioData.fotoProfil;
+            document.getElementById('display-tentang').textContent = portfolioData.tentang;
+
+            // Projects
+            const projectGrid = document.getElementById('project-grid');
+            projectGrid.innerHTML = ''; // Clear existing projects
+            portfolioData.proyek.forEach(p => {
+                const projectCard = `
+                    <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                        <img class="w-full h-56 object-cover" src="${p.gambar}" alt="Gambar ${p.judul}">
+                        <div class="p-6">
+                            <h3 class="font-bold text-xl mb-2 text-white">${p.judul}</h3>
+                            <p class="text-gray-400 text-base mb-4">${p.deskripsi}</p>
+                            <a href="${p.tautan}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                                Lihat Proyek &rarr;
+                            </a>
+                        </div>
+                    </div>`;
+                projectGrid.innerHTML += projectCard;
+            });
+        }
+
+        // Function to render the edit sidebar forms based on portfolioData
+        function renderSidebarForms() {
+            // General
+            document.getElementById('edit-nama').value = portfolioData.nama;
+            document.getElementById('edit-profesi').value = portfolioData.profesi;
+
+            // About
+            document.getElementById('edit-foto-profil').value = portfolioData.fotoProfil;
+            document.getElementById('edit-tentang').value = portfolioData.tentang;
+
+            // Projects
+            const projectList = document.getElementById('edit-proyek-list');
+            projectList.innerHTML = ''; // Clear existing forms
+            portfolioData.proyek.forEach((p, index) => {
+                const projectForm = `
+                    <div class="p-4 border border-gray-700 rounded-lg mb-4" data-project-index="${index}">
+                        <div class="flex justify-between items-center mb-2">
+                           <p class="font-semibold text-white">Proyek ${index + 1}</p>
+                           <button class="remove-project-btn text-red-500 hover:text-red-400" data-index="${index}"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <label class="sidebar-label">URL Gambar</label>
+                        <input type="text" class="sidebar-input edit-project-input" data-field="gambar" value="${p.gambar}">
+                        <label class="sidebar-label">Judul</label>
+                        <input type="text" class="sidebar-input edit-project-input" data-field="judul" value="${p.judul}">
+                        <label class="sidebar-label">Deskripsi</label>
+                        <textarea rows="3" class="sidebar-input edit-project-input" data-field="deskripsi">${p.deskripsi}</textarea>
+                        <label class="sidebar-label">Tautan Proyek</label>
+                        <input type="text" class="sidebar-input edit-project-input" data-field="tautan" value="${p.tautan}">
+                    </div>`;
+                projectList.innerHTML += projectForm;
+            });
+            addProjectInputListeners();
+        }
+        
+        // Function to add listeners to project edit inputs
+        function addProjectInputListeners() {
+            document.querySelectorAll('.edit-project-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const index = e.target.closest('[data-project-index]').dataset.projectIndex;
+                    const field = e.target.dataset.field;
+                    portfolioData.proyek[index][field] = e.target.value;
+                    renderPageContent();
+                });
+            });
+
+            document.querySelectorAll('.remove-project-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    portfolioData.proyek.splice(index, 1);
+                    renderPageContent();
+                    renderSidebarForms();
+                });
+            });
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Toggle sidebar visibility
+        toggleButton.addEventListener('click', () => sidebar.classList.add('open'));
+        closeButton.addEventListener('click', () => sidebar.classList.remove('open'));
+
+        // Listen for changes in general and about inputs
+        document.getElementById('edit-nama').addEventListener('input', (e) => {
+            portfolioData.nama = e.target.value;
+            renderPageContent();
+        });
+        document.getElementById('edit-profesi').addEventListener('input', (e) => {
+            portfolioData.profesi = e.target.value;
+            renderPageContent();
+        });
+        document.getElementById('edit-foto-profil').addEventListener('input', (e) => {
+            portfolioData.fotoProfil = e.target.value;
+            renderPageContent();
+        });
+        document.getElementById('edit-tentang').addEventListener('input', (e) => {
+            portfolioData.tentang = e.target.value;
+            renderPageContent();
+        });
+
+        // Add a new project
+        addProjectBtn.addEventListener('click', () => {
+            portfolioData.proyek.push({
+                gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+Baru",
+                judul: "Proyek Baru",
+                deskripsi: "Deskripsi untuk proyek baru.",
+                tautan: "#"
+            });
+            renderPageContent();
+            renderSidebarForms();
+        });
+
+        // --- INITIALIZATION ---
+        renderPageContent();
+        renderSidebarForms();
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- NAVIGATION LOGIC (UNCHANGED) ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mobileNav = document.getElementById('mobile-nav');
+        const sections = document.querySelectorAll('.content-section');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.dataset.target;
+                sections.forEach(section => section.classList.toggle('active', section.id === targetId));
+                navLinks.forEach(l => l.classList.toggle('nav-link-active', l.dataset.target === targetId));
+                mobileNav.value = targetId;
+            });
+        });
+        mobileNav.addEventListener('change', function() {
+            const targetId = this.value;
+            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
+            navLinks.forEach(l => l.classList.toggle('nav-link-active', l.dataset.target === targetId));
+        });
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('form-content').style.display = 'none';
+            document.getElementById('success-message').classList.remove('hidden');
+        });
+    });
+    </script>
+</body>
+</html>
