@@ -100,7 +100,7 @@
         <!-- About Settings -->
         <div class="mb-6 pb-6 border-b border-gray-700">
             <h3 class="text-xl font-semibold text-indigo-400">Tentang Saya</h3>
-             <label for="edit-foto-profil" class="sidebar-label">URL Foto Profil</label>
+             <label for="edit-foto-profil" class="sidebar-label">URL Foto Profil (Juga untuk Ikon Web)</label>
             <input type="text" id="edit-foto-profil" class="sidebar-input">
             <label for="edit-tentang" class="sidebar-label">Deskripsi Tentang Saya</label>
             <textarea id="edit-tentang" rows="5" class="sidebar-input"></textarea>
@@ -125,8 +125,8 @@
         <header class="py-6">
             <nav class="flex items-center justify-between">
                 <div class="text-2xl font-bold text-white">
-                    <a href="#" class="flex items-center gap-x-3 hover:text-indigo-400 transition-colors">
-                        <i class="fas fa-shapes text-indigo-400"></i>
+                    <a href="#" class="flex items-center gap-x-3 hover:opacity-80 transition-opacity">
+                        <img id="display-ikon-header" src="" alt="Ikon Profil" class="w-10 h-10 rounded-full object-cover">
                         <span id="display-nama-header">[Nama Anda/Perusahaan]</span>
                     </a>
                 </div>
@@ -263,6 +263,7 @@
         // Function to render all content to the page based on portfolioData
         function renderPageContent() {
             // General
+            document.getElementById('display-ikon-header').src = portfolioData.fotoProfil;
             document.getElementById('display-nama-header').textContent = portfolioData.nama;
             document.getElementById('display-nama-tentang').textContent = portfolioData.nama;
             document.getElementById('display-nama-footer').textContent = portfolioData.nama;
