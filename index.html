@@ -71,6 +71,39 @@
             font-weight: bold;
             margin-top: 1rem;
         }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #1f2937; /* bg-gray-800 */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.open .modal-content {
+            transform: scale(1);
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -84,15 +117,16 @@
     <aside id="edit-sidebar">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-white">Mode Edit</h2>
-            <button id="close-sidebar" class="text-gray-400 hover:text-white">&times;</button>
+            <button id="close-sidebar" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
         </div>
         
         <!-- General Settings -->
         <div class="mb-6 pb-6 border-b border-gray-700">
             <h3 class="text-xl font-semibold text-indigo-400">Info Umum</h3>
+            <label for="edit-ikon" class="sidebar-label">Ikon Header (Kelas Font Awesome)</label>
+            <input type="text" id="edit-ikon" class="sidebar-input" placeholder="contoh: fas fa-rocket">
             <label for="edit-nama" class="sidebar-label">Nama Anda/Perusahaan</label>
             <input type="text" id="edit-nama" class="sidebar-input">
-            
             <label for="edit-profesi" class="sidebar-label">Profesi</label>
             <input type="text" id="edit-profesi" class="sidebar-input">
         </div>
@@ -107,14 +141,23 @@
         </div>
 
         <!-- Projects Settings -->
-        <div class="mb-6">
+        <div class="mb-6 pb-6 border-b border-gray-700">
             <h3 class="text-xl font-semibold text-indigo-400">Proyek</h3>
-            <div id="edit-proyek-list">
-                <!-- Project edit forms will be injected here by JS -->
-            </div>
+            <div id="edit-proyek-list"></div>
             <button id="add-project-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                 <i class="fas fa-plus"></i> Tambah Proyek
             </button>
+        </div>
+
+        <!-- Domain CTA Settings -->
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-indigo-400">Pengaturan Domain</h3>
+            <label for="edit-domain-judul" class="sidebar-label">Judul Ajakan</label>
+            <input type="text" id="edit-domain-judul" class="sidebar-input">
+            <label for="edit-domain-teks" class="sidebar-label">Teks Ajakan</label>
+            <textarea id="edit-domain-teks" rows="3" class="sidebar-input"></textarea>
+            <label for="edit-domain-tombol" class="sidebar-label">Teks Tombol</label>
+            <input type="text" id="edit-domain-tombol" class="sidebar-input">
         </div>
     </aside>
 
@@ -126,17 +169,17 @@
             <nav class="flex items-center justify-between">
                 <div class="text-2xl font-bold text-white">
                     <a href="#" class="flex items-center gap-x-3 hover:text-indigo-400 transition-colors">
-                        <i class="fas fa-shapes text-indigo-400"></i>
+                        <i id="display-ikon-header" class="fas fa-shapes text-indigo-400"></i>
                         <span id="display-nama-header">[Nama Anda/Perusahaan]</span>
                     </a>
                 </div>
                 <ul class="hidden md:flex items-center space-x-2">
-                    <li><a href="#proyek" class="nav-link nav-link-active text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="proyek">Proyek</a></li>
-                    <li><a href="#tentang" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="tentang">Tentang Saya</a></li>
-                    <li><a href="#kontak" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-target="kontak">Kontak</a></li>
+                    <li><a href="#proyek" class="nav-link nav-link-active" data-target="proyek">Proyek</a></li>
+                    <li><a href="#tentang" class="nav-link" data-target="tentang">Tentang Saya</a></li>
+                    <li><a href="#kontak" class="nav-link" data-target="kontak">Kontak</a></li>
                 </ul>
                  <div class="md:hidden">
-                    <select id="mobile-nav" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                    <select id="mobile-nav" class="bg-gray-800 border-gray-700 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
                         <option value="proyek">Proyek</option>
                         <option value="tentang">Tentang</option>
                         <option value="kontak">Kontak</option>
@@ -146,73 +189,11 @@
         </header>
 
         <main>
-            <!-- Projects Section -->
-            <section id="proyek" class="content-section active py-12">
-                <div class="text-center mb-12">
-                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Portofolio Proyek</h1>
-                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                        Berikut adalah proyek-proyek terbaik yang pernah saya kerjakan.
-                    </p>
-                </div>
-                <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Project cards will be injected here by JS -->
-                </div>
-            </section>
-
-            <!-- About Section -->
-            <section id="tentang" class="content-section py-12">
-                 <div class="text-center mb-12">
-                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Tentang Saya</h1>
-                </div>
-                <div class="bg-gray-800 rounded-xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-                    <img id="display-foto-profil" class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover ring-4 ring-indigo-500" src="https://placehold.co/200x200/4338ca/ffffff?text=Foto+Anda" alt="Foto Profil">
-                    <div class="text-center md:text-left">
-                        <h2 id="display-nama-tentang" class="text-3xl font-bold text-white">[Nama Anda]</h2>
-                        <p id="display-profesi" class="text-indigo-400 font-semibold text-lg mt-1">[Nama Profesi Anda]</p>
-                        <p id="display-tentang" class="mt-4 text-gray-300 max-w-2xl">
-                            Tuliskan profil singkat Anda di sini.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Contact Section -->
-            <section id="kontak" class="content-section py-12">
-                <!-- Contact form remains the same -->
-                 <div class="text-center mb-12">
-                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Hubungi Saya</h1>
-                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                        Punya pertanyaan atau tawaran kerjasama? Silakan isi formulir di bawah ini.
-                    </p>
-                </div>
-                <div class="max-w-lg mx-auto bg-gray-800 rounded-xl shadow-lg p-8">
-                    <form id="contact-form">
-                        <div id="form-content">
-                            <div class="mb-4">
-                                <label for="name" class="block text-gray-300 text-sm font-bold mb-2">Nama</label>
-                                <input type="text" id="name" name="name" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                            </div>
-                            <div class="mb-4">
-                                <label for="email" class="block text-gray-300 text-sm font-bold mb-2">Email</label>
-                                <input type="email" id="email" name="email" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                            </div>
-                            <div class="mb-6">
-                                <label for="message" class="block text-gray-300 text-sm font-bold mb-2">Pesan</label>
-                                <textarea id="message" name="message" rows="4" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"></textarea>
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                                    Kirim Pesan
-                                </button>
-                            </div>
-                        </div>
-                         <div id="success-message" class="hidden text-center">
-                            <h3 class="text-2xl font-bold text-green-400">Pesan Terkirim!</h3>
-                            <p class="text-gray-300 mt-2">Terima kasih telah menghubungi saya. Saya akan segera merespons pesan Anda.</p>
-                        </div>
-                    </form>
-                </div>
-            </section>
+            <!-- Sections will be inserted here -->
+            <section id="proyek" class="content-section active py-12"></section>
+            <section id="tentang" class="content-section py-12"></section>
+            <section id="domain-cta" class="content-section py-12"></section>
+            <section id="kontak" class="content-section py-12"></section>
         </main>
 
         <!-- Footer -->
@@ -222,34 +203,38 @@
 
     </div>
 
+    <!-- Domain Check Modal -->
+    <div id="domain-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h3 class="text-2xl font-bold text-white mb-4">Cek Ketersediaan Domain</h3>
+            <p class="text-gray-400 mb-6">Masukkan nama domain yang Anda inginkan (contoh: portofoliohebat.com)</p>
+            <input type="text" id="domain-input" placeholder="namadomainanda.com" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors mb-4">
+            <button id="check-domain-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                Cek Ketersediaan
+            </button>
+            <button id="close-modal-btn" class="mt-4 text-gray-400 hover:text-white">Tutup</button>
+        </div>
+    </div>
+
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // --- DATA ---
         let portfolioData = {
+            ikonHeader: "fas fa-shapes",
             nama: "Nama Anda",
             profesi: "Profesi Anda",
             fotoProfil: "https://placehold.co/200x200/4338ca/ffffff?text=Foto+Anda",
-            tentang: "Tuliskan profil singkat Anda di sini. Ceritakan tentang passion Anda, keahlian utama, dan pengalaman yang relevan. Buat paragraf ini menarik dan informatif.",
+            tentang: "Tuliskan profil singkat Anda di sini...",
             proyek: [
-                {
-                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+1",
-                    judul: "Judul Proyek Pertama",
-                    deskripsi: "Deskripsi singkat tentang proyek ini. Jelaskan teknologi yang digunakan, peran Anda, dan hasil yang dicapai.",
-                    tautan: "#"
-                },
-                {
-                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+2",
-                    judul: "Judul Proyek Kedua",
-                    deskripsi: "Ini adalah contoh studi kasus. Anda bisa menjelaskan tantangan, proses pemecahan masalah, dan solusi yang diimplementasikan.",
-                    tautan: "#"
-                },
-                {
-                    gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+3",
-                    judul: "Judul Proyek Ketiga",
-                    deskripsi: "Proyek ini menampilkan keahlian dalam [sebutkan keahlian]. Fokus pada kontribusi unik dan dampak yang dihasilkan.",
-                    tautan: "#"
-                }
-            ]
+                { gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+1", judul: "Judul Proyek Pertama", deskripsi: "Deskripsi singkat...", tautan: "#" },
+                { gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+2", judul: "Judul Proyek Kedua", deskripsi: "Deskripsi singkat...", tautan: "#" },
+            ],
+            domainCTA: {
+                judul: "Wujudkan Portofolio Anda Secara Online",
+                teks: "Dapatkan nama domain yang profesional dan buat portofolio Anda dapat diakses oleh seluruh dunia. Mulai sekarang!",
+                tombol: "Dapatkan Domain Saya"
+            }
         };
 
         // --- ELEMENTS ---
@@ -257,43 +242,119 @@
         const toggleButton = document.getElementById('toggle-edit-mode');
         const closeButton = document.getElementById('close-sidebar');
         const addProjectBtn = document.getElementById('add-project-btn');
+        const domainModal = document.getElementById('domain-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const checkDomainBtn = document.getElementById('check-domain-btn');
+
 
         // --- FUNCTIONS ---
 
-        // Function to render all content to the page based on portfolioData
         function renderPageContent() {
             // General
+            document.getElementById('display-ikon-header').className = `${portfolioData.ikonHeader} text-indigo-400`;
             document.getElementById('display-nama-header').textContent = portfolioData.nama;
-            document.getElementById('display-nama-tentang').textContent = portfolioData.nama;
             document.getElementById('display-nama-footer').textContent = portfolioData.nama;
-            document.getElementById('display-profesi').textContent = portfolioData.profesi;
             
-            // About
-            document.getElementById('display-foto-profil').src = portfolioData.fotoProfil;
-            document.getElementById('display-tentang').textContent = portfolioData.tentang;
+            // Render Sections
+            renderProyekSection();
+            renderTentangSection();
+            renderDomainSection();
+            renderKontakSection();
+        }
 
-            // Projects
-            const projectGrid = document.getElementById('project-grid');
-            projectGrid.innerHTML = ''; // Clear existing projects
+        function renderProyekSection() {
+            const section = document.getElementById('proyek');
+            let content = `
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Portofolio Proyek</h1>
+                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Berikut adalah proyek-proyek terbaik yang pernah saya kerjakan.</p>
+                </div>
+                <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">`;
             portfolioData.proyek.forEach(p => {
-                const projectCard = `
+                content += `
                     <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
                         <img class="w-full h-56 object-cover" src="${p.gambar}" alt="Gambar ${p.judul}">
                         <div class="p-6">
                             <h3 class="font-bold text-xl mb-2 text-white">${p.judul}</h3>
                             <p class="text-gray-400 text-base mb-4">${p.deskripsi}</p>
-                            <a href="${p.tautan}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                                Lihat Proyek &rarr;
-                            </a>
+                            <a href="${p.tautan}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Lihat Proyek &rarr;</a>
                         </div>
                     </div>`;
-                projectGrid.innerHTML += projectCard;
+            });
+            content += `</div>`;
+            section.innerHTML = content;
+        }
+
+        function renderTentangSection() {
+            const section = document.getElementById('tentang');
+            section.innerHTML = `
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Tentang Saya</h1>
+                </div>
+                <div class="bg-gray-800 rounded-xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+                    <img class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover ring-4 ring-indigo-500" src="${portfolioData.fotoProfil}" alt="Foto Profil">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-bold text-white">${portfolioData.nama}</h2>
+                        <p class="text-indigo-400 font-semibold text-lg mt-1">${portfolioData.profesi}</p>
+                        <p class="mt-4 text-gray-300 max-w-2xl">${portfolioData.tentang}</p>
+                    </div>
+                </div>`;
+        }
+        
+        function renderDomainSection() {
+            const section = document.getElementById('domain-cta');
+            const cta = portfolioData.domainCTA;
+            section.innerHTML = `
+                <div class="text-center bg-gray-800 rounded-xl shadow-lg p-8 md:p-12">
+                    <h2 class="text-3xl font-bold text-white">${cta.judul}</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-gray-400">${cta.teks}</p>
+                    <button id="open-domain-modal-btn" class="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg">${cta.tombol}</button>
+                </div>`;
+            document.getElementById('open-domain-modal-btn').addEventListener('click', () => domainModal.classList.add('open'));
+        }
+
+        function renderKontakSection() {
+            const section = document.getElementById('kontak');
+            section.innerHTML = `
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">Hubungi Saya</h1>
+                    <p class="mt-3 max-w-md mx-auto text-base text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">Punya pertanyaan atau tawaran kerjasama? Silakan isi formulir di bawah ini.</p>
+                </div>
+                <div class="max-w-lg mx-auto bg-gray-800 rounded-xl shadow-lg p-8">
+                    <form id="contact-form">
+                        <div id="form-content">
+                            <div class="mb-4">
+                                <label for="name" class="block text-gray-300 text-sm font-bold mb-2">Nama</label>
+                                <input type="text" id="name" name="name" required class="sidebar-input">
+                            </div>
+                            <div class="mb-4">
+                                <label for="email" class="block text-gray-300 text-sm font-bold mb-2">Email</label>
+                                <input type="email" id="email" name="email" required class="sidebar-input">
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-300 text-sm font-bold mb-2">Pesan</label>
+                                <textarea id="message" name="message" rows="4" required class="sidebar-input"></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">Kirim Pesan</button>
+                            </div>
+                        </div>
+                        <div id="success-message" class="hidden text-center">
+                            <h3 class="text-2xl font-bold text-green-400">Pesan Terkirim!</h3>
+                            <p class="text-gray-300 mt-2">Terima kasih telah menghubungi saya.</p>
+                        </div>
+                    </form>
+                </div>`;
+            document.getElementById('contact-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                document.getElementById('form-content').style.display = 'none';
+                document.getElementById('success-message').classList.remove('hidden');
             });
         }
 
-        // Function to render the edit sidebar forms based on portfolioData
         function renderSidebarForms() {
             // General
+            document.getElementById('edit-ikon').value = portfolioData.ikonHeader;
             document.getElementById('edit-nama').value = portfolioData.nama;
             document.getElementById('edit-profesi').value = portfolioData.profesi;
 
@@ -301,11 +362,16 @@
             document.getElementById('edit-foto-profil').value = portfolioData.fotoProfil;
             document.getElementById('edit-tentang').value = portfolioData.tentang;
 
+            // Domain CTA
+            document.getElementById('edit-domain-judul').value = portfolioData.domainCTA.judul;
+            document.getElementById('edit-domain-teks').value = portfolioData.domainCTA.teks;
+            document.getElementById('edit-domain-tombol').value = portfolioData.domainCTA.tombol;
+
             // Projects
             const projectList = document.getElementById('edit-proyek-list');
-            projectList.innerHTML = ''; // Clear existing forms
+            projectList.innerHTML = '';
             portfolioData.proyek.forEach((p, index) => {
-                const projectForm = `
+                projectList.innerHTML += `
                     <div class="p-4 border border-gray-700 rounded-lg mb-4" data-project-index="${index}">
                         <div class="flex justify-between items-center mb-2">
                            <p class="font-semibold text-white">Proyek ${index + 1}</p>
@@ -320,19 +386,17 @@
                         <label class="sidebar-label">Tautan Proyek</label>
                         <input type="text" class="sidebar-input edit-project-input" data-field="tautan" value="${p.tautan}">
                     </div>`;
-                projectList.innerHTML += projectForm;
             });
             addProjectInputListeners();
         }
         
-        // Function to add listeners to project edit inputs
         function addProjectInputListeners() {
             document.querySelectorAll('.edit-project-input').forEach(input => {
                 input.addEventListener('input', (e) => {
                     const index = e.target.closest('[data-project-index]').dataset.projectIndex;
                     const field = e.target.dataset.field;
                     portfolioData.proyek[index][field] = e.target.value;
-                    renderPageContent();
+                    renderProyekSection();
                 });
             });
 
@@ -340,46 +404,40 @@
                 button.addEventListener('click', (e) => {
                     const index = e.currentTarget.dataset.index;
                     portfolioData.proyek.splice(index, 1);
-                    renderPageContent();
+                    renderProyekSection();
                     renderSidebarForms();
                 });
             });
         }
 
         // --- EVENT LISTENERS ---
-
-        // Toggle sidebar visibility
         toggleButton.addEventListener('click', () => sidebar.classList.add('open'));
         closeButton.addEventListener('click', () => sidebar.classList.remove('open'));
 
-        // Listen for changes in general and about inputs
-        document.getElementById('edit-nama').addEventListener('input', (e) => {
-            portfolioData.nama = e.target.value;
-            renderPageContent();
-        });
-        document.getElementById('edit-profesi').addEventListener('input', (e) => {
-            portfolioData.profesi = e.target.value;
-            renderPageContent();
-        });
-        document.getElementById('edit-foto-profil').addEventListener('input', (e) => {
-            portfolioData.fotoProfil = e.target.value;
-            renderPageContent();
-        });
-        document.getElementById('edit-tentang').addEventListener('input', (e) => {
-            portfolioData.tentang = e.target.value;
-            renderPageContent();
+        document.getElementById('edit-ikon').addEventListener('input', (e) => { portfolioData.ikonHeader = e.target.value; renderPageContent(); });
+        document.getElementById('edit-nama').addEventListener('input', (e) => { portfolioData.nama = e.target.value; renderPageContent(); });
+        document.getElementById('edit-profesi').addEventListener('input', (e) => { portfolioData.profesi = e.target.value; renderTentangSection(); });
+        document.getElementById('edit-foto-profil').addEventListener('input', (e) => { portfolioData.fotoProfil = e.target.value; renderTentangSection(); });
+        document.getElementById('edit-tentang').addEventListener('input', (e) => { portfolioData.tentang = e.target.value; renderTentangSection(); });
+        
+        document.getElementById('edit-domain-judul').addEventListener('input', (e) => { portfolioData.domainCTA.judul = e.target.value; renderDomainSection(); });
+        document.getElementById('edit-domain-teks').addEventListener('input', (e) => { portfolioData.domainCTA.teks = e.target.value; renderDomainSection(); });
+        document.getElementById('edit-domain-tombol').addEventListener('input', (e) => { portfolioData.domainCTA.tombol = e.target.value; renderDomainSection(); });
+
+        addProjectBtn.addEventListener('click', () => {
+            portfolioData.proyek.push({ gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+Baru", judul: "Proyek Baru", deskripsi: "Deskripsi...", tautan: "#" });
+            renderProyekSection();
+            renderSidebarForms();
         });
 
-        // Add a new project
-        addProjectBtn.addEventListener('click', () => {
-            portfolioData.proyek.push({
-                gambar: "https://placehold.co/600x400/1f2937/ffffff?text=Proyek+Baru",
-                judul: "Proyek Baru",
-                deskripsi: "Deskripsi untuk proyek baru.",
-                tautan: "#"
-            });
-            renderPageContent();
-            renderSidebarForms();
+        // Modal listeners
+        closeModalBtn.addEventListener('click', () => domainModal.classList.remove('open'));
+        domainModal.addEventListener('click', (e) => { if (e.target === domainModal) { domainModal.classList.remove('open'); }});
+        checkDomainBtn.addEventListener('click', () => {
+            const domainName = document.getElementById('domain-input').value;
+            if (domainName) {
+                window.open(`https://www.namecheap.com/domains/registration/results/?domain=${domainName}`, '_blank');
+            }
         });
 
         // --- INITIALIZATION ---
@@ -387,29 +445,36 @@
         renderSidebarForms();
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // --- NAVIGATION LOGIC (UNCHANGED) ---
+        // --- NAVIGATION LOGIC ---
         const navLinks = document.querySelectorAll('.nav-link');
         const mobileNav = document.getElementById('mobile-nav');
         const sections = document.querySelectorAll('.content-section');
+        const allSectionIds = ['proyek', 'tentang', 'domain-cta', 'kontak'];
+
+        function switchTab(targetId) {
+            sections.forEach(s => s.classList.remove('active'));
+            navLinks.forEach(l => l.classList.remove('nav-link-active'));
+            
+            const sectionToShow = document.getElementById(targetId);
+            if (sectionToShow) sectionToShow.classList.add('active');
+
+            const linkToActivate = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+            if (linkToActivate) linkToActivate.classList.add('nav-link-active');
+            
+            if (!linkToActivate) { // Handle case for domain-cta which is not in nav
+                document.querySelector('.nav-link[data-target="proyek"]').classList.add('nav-link-active');
+            }
+
+            mobileNav.value = targetId;
+        }
+
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
-                const targetId = this.dataset.target;
-                sections.forEach(section => section.classList.toggle('active', section.id === targetId));
-                navLinks.forEach(l => l.classList.toggle('nav-link-active', l.dataset.target === targetId));
-                mobileNav.value = targetId;
+                switchTab(this.dataset.target);
             });
         });
-        mobileNav.addEventListener('change', function() {
-            const targetId = this.value;
-            sections.forEach(section => section.classList.toggle('active', section.id === targetId));
-            navLinks.forEach(l => l.classList.toggle('nav-link-active', l.dataset.target === targetId));
-        });
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('form-content').style.display = 'none';
-            document.getElementById('success-message').classList.remove('hidden');
-        });
+        mobileNav.addEventListener('change', function() { switchTab(this.value); });
     });
     </script>
 </body>
